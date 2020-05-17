@@ -13,3 +13,7 @@
 
 command1 = 'switchport trunk allowed vlan 1,2,3,5,8'
 command2 = 'switchport trunk allowed vlan 1,3,8,9'
+
+vlans1 = command1[command1.find("vlan")+5:].split(',')          
+vlans2 = command2[command2.find("vlan")+5:].split(',')
+print(vlans1 and vlans2)
