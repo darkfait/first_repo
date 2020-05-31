@@ -12,3 +12,11 @@
 
 Ограничение: Все задания надо выполнять используя только пройденные темы.
 '''
+
+
+with open('config_sw1.txt') as conf_sw:
+    for line in conf_sw:
+        if line.startswith('!'):
+            continue
+        else:
+            print(line.strip())

@@ -17,3 +17,10 @@
 Ограничение: Все задания надо выполнять используя только пройденные темы.
 
 '''
+
+with open('CAM_table.txt') as cam_table:
+    for line in cam_table:
+        if line.count('.') != 2:
+            continue
+        else:
+            print(line.replace('    DYNAMIC     ','   ').rstrip())

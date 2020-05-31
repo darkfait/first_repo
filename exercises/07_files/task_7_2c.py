@@ -16,4 +16,19 @@
 Ограничение: Все задания надо выполнять используя только пройденные темы.
 '''
 
+from sys import argv
+
 ignore = ['duplex', 'alias', 'Current configuration']
+
+with open(argv[1]) as conf_sw, open(argv[2], 'w') as conf_sw_cleared:
+    for line in conf_sw:
+        a1 = False
+        for no_word in ignore:
+            if no_word in line:
+                a1 = True
+                break
+        if a1 == True:
+            continue
+        else:
+            conf_sw_cleared.write(line.strip() + '\n')
+     
