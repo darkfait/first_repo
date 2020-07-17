@@ -41,10 +41,26 @@ Cгенерировать топологию, которая соответст�
 
 """
 
+from task_11_1 import parse_cdp_neighbors
+from draw_network_graph import draw_topology
+
 # эти заготовки написаны чтобы показать в какой момент должна
 # рисоваться топология (после вызова функции)
 def create_network_map(filenames):
-    pass
+    cdp_map_dict = {}
+    for cdp_file in filenames:
+        with open(cdp_file) as f:
+            cdp_temp_dict = {}
+            cdp_temp_dict.update(parse_cdp_neighbors(f.read()))
+            #print(cdp_temp_dict.items())
+            for dkey, dval in cdp_temp_dict.items():
+                #print(dkey, dval)
+                if cdp_map_dict.get(dval) == dkey:
+                    continue
+                else:
+                    cdp_map_dict[dkey] = dval
+            #print(parse_cdp_neighbors(f.read()))
+    return cdp_map_dict
 
 
 if __name__ == "__main__":
@@ -57,4 +73,5 @@ if __name__ == "__main__":
 
     topology = create_network_map(infiles)
     # рисуем топологию:
-    # draw_topology(topology)
+    draw_topology(topology)
+    #print(topology)

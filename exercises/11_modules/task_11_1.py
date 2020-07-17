@@ -43,17 +43,11 @@ def parse_cdp_neighbors(command_output):
     result_cdp={}
     lines = command_output.split('\n')
     for line in lines:
-        print(line)
-        print('_'*10)
         if 'show cdp neighbors' in line:
             loc_id = line[:(line.find('>'))]
-            print(loc_id)
+            #print(loc_id)
         elif line and line[-1].isdigit():
-            #print(line[-1])
-            #print(line[-1].isdigit)
-            print(loc_id)
             rem_id, loc_itype, loc_inum, *rest, rem_itype, rem_inum = line.lstrip().split()
-            #print(rem_id, loc_itype, loc_inum, *rest, rem_itype, rem_inum)
             result_cdp[(loc_id,loc_itype + loc_inum)] = (rem_id,rem_itype + rem_inum)
     return result_cdp
 
