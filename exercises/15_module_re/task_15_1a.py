@@ -22,3 +22,24 @@
 диапазоны адресов и так далее, так как обрабатывается вывод команды, а не ввод пользователя.
 
 """
+
+
+import re
+from pprint import pprint
+
+def get_ip_from_cfg(file):
+    result = {}
+    regex = (r'^interface (?P<iface>\S+)$'
+             r'|ip address (?P<ipad_msk>\S+) (?P<ipmsk>\S+)')
+    with open(file) as f:
+        for line in f:
+            s_match = re.search(regex,line)
+            if s_match:
+                #print(s_match)
+                if s_match.lastgroup == 'iface':
+                    interface = s_match.group(s_match.lastgroup)                    
+                else:
+                    result[interface] = (s_match.group('ipad_msk','ipmsk'))
+    return result
+    
+pprint(get_ip_from_cfg('config_r1.txt'))

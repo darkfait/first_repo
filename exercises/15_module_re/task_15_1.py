@@ -21,4 +21,21 @@
 Обратите внимание, что в данном случае, можно не проверять корректность IP-адреса,
 диапазоны адресов и так далее, так как обрабатывается вывод команды, а не ввод пользователя.
 
+ip address 10.0.13.1 255.255.255.0
+
 """
+
+
+import re
+
+def get_ip_from_cfg(file):
+    result = []
+    regex = (r' ip address (\S+) (\S+)')
+    with open(file) as f:
+        for line in f:
+            ip_m = re.search(regex,line)
+            if ip_m:
+                result.append(ip_m.groups())
+    return result
+    
+print(get_ip_from_cfg('config_r1.txt'))

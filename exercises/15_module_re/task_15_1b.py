@@ -25,3 +25,30 @@ Ethernet0/1 соответствует список из двух кортеже
 диапазоны адресов и так далее, так как обрабатывается вывод команды, а не ввод пользователя.
 
 """
+
+import re
+from pprint import pprint
+
+def get_ip_from_cfg(file):
+    result = {}
+    regex = (r'^interface (?P<iface>\S+)$'
+             r'|ip address (?P<ipad>\S+) (?P<ipmsk>\S+)$'
+             r'|ip address (?P<ipad2>\S+) (?P<ipmsk2>\S+) secondary')
+    with open(file) as f:
+        for line in f:
+            s_match = re.search(regex,line)
+            if s_match:
+                #print(s_match)
+                if s_match.lastgroup == 'iface':
+                    interface = s_match.group(s_match.lastgroup)    
+                elif s_match.lastgroup == 'ipmsk':
+                    #print(s_match.group('ipad','ipmsk'))
+                    result[interface] = []
+                    result[interface].append(s_match.group('ipad','ipmsk'))
+                else:
+                    #print('2nd',s_match.group('ipad_msk2','ipmsk2'))
+                    result[interface].append(s_match.group('ipad2','ipmsk2'))
+                    
+    return result
+    
+pprint(get_ip_from_cfg('config_r2.txt'))

@@ -22,3 +22,16 @@ interface Loopback0
 
 Проверить работу функции на примере файла config_r1.txt.
 """
+
+import re
+from pprint import pprint
+
+def get_ints_without_description(file):
+    regex = r'^interface (?P<intf>\S+)\n (?:description (?P<descrip>.+?)\n)*'
+    result = []
+    with open(file) as f:
+        match_iter = re.finditer(regex,f.read(),re.MULTILINE)
+        result = [match.group('intf') for match in match_iter if not match.group('descrip')]
+    return result
+
+pprint(get_ints_without_description('config_r1.txt'))

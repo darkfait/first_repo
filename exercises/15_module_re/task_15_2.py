@@ -20,4 +20,24 @@
 
 Проверить работу функции на примере файла sh_ip_int_br.txt.
 
+
+FastEthernet0/2            10.0.13.1       YES manual up                    up
+FastEthernet0/3            unassigned      YES unset  administratively down down
+
 """
+
+import re
+
+from pprint import pprint
+
+def parse_sh_ip_int_br(file):
+    regex = r'(\S+) +([\d.]+|unassigned).+?(up|down|administratively down) +(up|down)'
+    result = []
+    with open(file) as f:
+        match_iter = re.finditer(regex,f.read())
+        for match in match_iter:
+            result.append(match.groups())
+    return result
+    
+if __name__ == "__main__":
+    pprint(parse_sh_ip_int_br('sh_ip_int_br.txt'))
