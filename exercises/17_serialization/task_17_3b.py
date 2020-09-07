@@ -10,6 +10,13 @@
     {('R4', 'Fa 0/1'): ('R5', 'Fa 0/1'),
      ('R4', 'Fa 0/2'): ('R6', 'Fa 0/0')}
 
+
+{'R4': {'Fa 0/1': {'R5': 'Fa 0/1'},
+        'Fa 0/2': {'R6': 'Fa 0/0'}},
+ 'R5': {'Fa 0/1': {'R4': 'Fa 0/1'}},
+ 'R6': {'Fa 0/0': {'R4': 'Fa 0/2'}}}
+ 
+ 
 Функция transform_topology должна не только менять формат представления топологии, но и удалять дублирующиеся соединения (их лучше всего видно на схеме, которую генерирует draw_topology).
 
 Проверить работу функции на файле topology.yaml (должен быть создан в задании 17.3a).
@@ -32,3 +39,38 @@
 > pip install graphviz
 
 """
+
+
+
+import yaml
+import re
+from pprint import pprint
+from draw_network_graph import draw_topology
+
+
+
+def transform_topology(yaml_file):
+    result = {}
+    with open(yaml_file) as f:
+        source_dict = yaml.safe_load(f)
+        for f_key, f_val in source_dict.items():
+            #pprint(source_dict.items())
+            for sec_key, sec_val in f_val.items():
+                a = f_key
+                b = sec_key
+                for c, d in sec_val.items():
+                    part_res = {(a,b):(c,d)}
+                    result.update(part_res)
+    pprint(result)
+    return result
+    
+'''{'Fa 0/1': {'R5': 'Fa 0/1'},
+        'Fa 0/2': {'R6': 'Fa 0/0'}}'''    
+
+
+
+if __name__ == "__main__":
+    draw_topology(transform_topology('topology.yaml'))
+
+
+

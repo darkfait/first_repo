@@ -37,6 +37,8 @@ C-3PO,c3po@gmail.com,16/12/2019 17:24
 """
 
 import datetime
+import csv
+from pprint import pprint
 
 
 def convert_datetimestr_to_datetime(datetime_str):
@@ -44,3 +46,29 @@ def convert_datetimestr_to_datetime(datetime_str):
     Конвертирует строку с датой в формате 11/10/2019 14:05 в объект datetime.
     """
     return datetime.datetime.strptime(datetime_str, "%d/%m/%Y %H:%M")
+
+
+def write_last_log_to_csv(source_log,output):
+    with open(source_log) as f, open(output, 'w') as fo:
+        result_dict = {}
+        freader = csv.reader(f)
+        writer = csv.writer(fo, quoting=csv.QUOTE_NONNUMERIC)
+        writer.writerow(next(freader))
+        #next(freader)
+        for row in freader:
+            #pprint(row)
+            a,b,c = row
+            if result_dict.get(b):
+                date1 = convert_datetimestr_to_datetime(result_dict.get(b)[1])
+                date2 = convert_datetimestr_to_datetime(c)
+                if date2 > date1:
+                    result_dict[b] = (a,c)
+            else:
+                result_dict[b] = (a,c)
+        for key, val in result_dict.items():
+            data = [val[0],key,val[1]]
+            writer.writerow(data)
+            pprint(data)
+    return None
+
+write_last_log_to_csv('mail_log.csv','test1.csv')

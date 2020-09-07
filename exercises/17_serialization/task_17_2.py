@@ -40,8 +40,39 @@
 """
 
 import glob
+import csv
+import re
+from pprint import pprint
 
 sh_version_files = glob.glob("sh_vers*")
 # print(sh_version_files)
 
 headers = ["hostname", "ios", "image", "uptime"]
+
+
+def parse_sh_version(sh_vers):
+    regex = r'Version (\S+), .+? uptime is (\d+ days, \d+ hours, \d+ minutes).+? image file is "(\S+)"'
+    shver_out = re.search(regex, sh_vers, re.DOTALL).group(1,3,2)
+    return shver_out
+    
+
+#pprint(parse_sh_version(my_text))
+
+
+def write_inventory_to_csv(data_filenames,csv_filename):
+    result = []
+    for d_file in data_filenames:
+        sw_name = re.search('version_(\w+).',d_file).group(1)
+        with open(d_file) as f:
+            datas = parse_sh_version(f.read())
+            result.append([sw_name] + list(datas))
+    with open(csv_filename, 'w') as fo:
+        writer = csv.writer(fo, quoting=csv.QUOTE_NONNUMERIC)
+        writer.writerow(headers)
+        writer.writerows(result)        
+    return None
+
+
+write_inventory_to_csv(sh_version_files,'test1.csv')
+    
+    
