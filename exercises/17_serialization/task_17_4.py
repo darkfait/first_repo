@@ -38,7 +38,6 @@ C-3PO,c3po@gmail.com,16/12/2019 17:24
 
 import datetime
 import csv
-from pprint import pprint
 
 
 def convert_datetimestr_to_datetime(datetime_str):
@@ -54,9 +53,7 @@ def write_last_log_to_csv(source_log,output):
         freader = csv.reader(f)
         writer = csv.writer(fo, quoting=csv.QUOTE_NONNUMERIC)
         writer.writerow(next(freader))
-        #next(freader)
         for row in freader:
-            #pprint(row)
             a,b,c = row
             if result_dict.get(b):
                 date1 = convert_datetimestr_to_datetime(result_dict.get(b)[1])
@@ -68,7 +65,24 @@ def write_last_log_to_csv(source_log,output):
         for key, val in result_dict.items():
             data = [val[0],key,val[1]]
             writer.writerow(data)
-            pprint(data)
     return None
 
 write_last_log_to_csv('mail_log.csv','test1.csv')
+
+'''
+def write_last_log_to_csv(source_log, output):
+    with open(source_log) as f:
+        data = list(csv.reader(f))
+        header = data[0]
+    result = {}
+    sorted_by_date = sorted(
+        data[1:], key=lambda x: convert_datetimestr_to_datetime(x[2])
+    )
+    for name, email, date in sorted_by_date:
+        result[email] = (name, email, date)
+    with open(output, "w") as dest:
+        writer = csv.writer(dest)
+        writer.writerow(header)
+        for row in result.values():
+            writer.writerow(row)
+'''
