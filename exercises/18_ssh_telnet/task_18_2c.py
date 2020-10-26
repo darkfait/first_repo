@@ -54,3 +54,45 @@ commands_with_errors = ["logging 0255.255.1", "logging", "a"]
 correct_commands = ["logging buffered 20010", "ip http server"]
 
 commands = commands_with_errors + correct_commands
+
+
+
+import yaml
+import re
+from netmiko import (ConnectHandler)
+from pprint import pprint
+
+
+def send_config_commands(device,config_commands, log=True):
+    regex = (r'.+Invalid input detected.+?'
+             r'|.+Incomplete command.+?'
+             r'|.+Ambiguous command.+?')
+    if log:
+        log_print = f'Подключаюсь к {device["host"]}'
+        print(log_print)
+    with ConnectHandler(**device) as ssh:
+        result_correct = {}
+        result_errors = {}
+        ssh.enable()
+        for command in config_commands:
+            part_res = ssh.send_config_set(command)
+            match = re.search(regex,part_res)
+            if match:
+                print(f'Команда {command} выполнилась с ошибкой \"{match.group()}\"  на устройстве {device["host"]}')
+                result_errors[command] = part_res
+                if input('Продолжать выполнять команды? [y]/n :   ') in ('n','no'):
+                    break
+            #Команда "logging" выполнилась с ошибкой "Incomplete command." на устройстве 192.168.100.1
+            else:
+                result_correct[command] = part_res
+        return (result_correct,result_errors)
+    
+    
+
+if __name__ == "__main__":
+    with open("devices.yaml") as f:
+        devices = yaml.safe_load(f)
+    for dev in devices:
+        pprint(send_config_commands(dev, commands))
+
+

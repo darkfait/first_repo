@@ -16,7 +16,13 @@
 
 """
 import yaml
+from netmiko import ConnectHandler
 
+def send_show_command(dev_add,command):
+    ssh = ConnectHandler(**dev_add)
+    ssh.enable()
+    result = ssh.send_command(command)
+    return result
 
 
 if __name__ == "__main__":
