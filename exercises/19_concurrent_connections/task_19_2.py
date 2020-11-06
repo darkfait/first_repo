@@ -33,3 +33,46 @@ Ethernet0/1                unassigned      YES NVRAM  administratively down down
 
 Проверить работу функции на устройствах из файла devices.yaml
 """
+
+
+import yaml
+from concurrent.futures import ThreadPoolExecutor, as_completed
+import logging 
+from netmiko import (ConnectHandler,
+                    NetMikoAuthenticationException,
+                    NetMikoTimeoutException)
+
+logging.getLogger("paramiko").setLevel(logging.WARNING)
+
+logging.basicConfig(
+    format = '%(threadName)s %(name)s %(levelname)s: %(message)s',
+    level=logging.INFO)
+    
+
+def send_show_to_one(device,command):
+    try:
+        with ConnectHandler(**device) as ssh:
+            ssh.enable()
+            hostname = ssh.find_prompt()
+            result = hostname + ssh.send_command(command, strip_command=False) + '\n'
+            #logging.info(result)
+        return result
+    except (NetMikoAuthenticationException, NetMikoTimeoutException) as error:
+        logging.info(error)
+        return
+
+def send_show_command_to_devices(devices,command,filename,limit):
+    with ThreadPoolExecutor(max_workers=limit) as executor:
+        future_list = [executor.submit(send_show_to_one,device,command) for device in devices]
+        with open(filename,'w') as fwr:
+            for fut in as_completed(future_list):
+                fwr.write(fut.result())
+    return
+    
+    
+    
+    
+if __name__ == '__main__':
+    with open('devices.yaml') as f:
+        devices = yaml.safe_load(f)
+    send_show_command_to_devices(devices,'show ip int br','testfile_task2.txt',5)

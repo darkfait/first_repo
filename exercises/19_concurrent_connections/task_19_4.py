@@ -2,7 +2,8 @@
 """
 Задание 19.4
 
-Создать функцию send_commands_to_devices, которая отправляет команду show или config на разные устройства в параллельных потоках, а затем записывает вывод команд в файл.
+Создать функцию send_commands_to_devices, которая отправляет команду show или config на разные устройства в параллельных потоках, а затем записывает 
+вывод команд в файл.
 
 Параметры функции:
 * devices - список словарей с параметрами подключения к устройствам
@@ -86,3 +87,60 @@ R3#
 
 Для выполнения задания можно создавать любые дополнительные функции.
 """
+
+
+
+import yaml
+from concurrent.futures import ThreadPoolExecutor, as_completed
+import logging 
+from netmiko import (ConnectHandler,
+                    NetMikoAuthenticationException,
+                    NetMikoTimeoutException)
+
+logging.getLogger("paramiko").setLevel(logging.WARNING)
+
+logging.basicConfig(
+    format = '%(threadName)s %(name)s %(levelname)s: %(message)s',
+    level=logging.INFO)
+    
+
+
+
+def send_show_to_one(device,command):
+    try:
+        with ConnectHandler(**device) as ssh:
+            ssh.enable()
+            hostname = ssh.find_prompt()
+            result = hostname + ssh.send_command(command, strip_command=False) + '\n'
+            return result
+    except (NetMikoAuthenticationException, NetMikoTimeoutException) as error:
+        logging.info(error)
+        return
+
+def send_conf_to_one(device,conf_commands):
+    with ConnectHandler(**device) as ssh:
+        ssh.enable()
+        result = ssh.send_config_set(conf_commands)
+        return result
+
+def send_commands_to_devices(devices,show=None,config=None,filename='testfile_task4.txt',limit=3):
+    with ThreadPoolExecutor(max_workers=limit) as executor:
+        if show:
+            future_list = [executor.submit(send_show_to_one,device,show) for device in devices]
+        elif config:
+            future_list = [executor.submit(send_conf_to_one,device,config) for device in devices]
+        with open(filename,'w') as fwr:
+            for fut in as_completed(future_list):
+                fwr.write(fut.result())
+    return
+    
+    
+    
+
+    
+if __name__ == '__main__':
+    with open('devices.yaml') as f:
+        devices = yaml.safe_load(f)
+    send_commands_to_devices(devices,config=['router ospf 55', 'network 0.0.0.0 255.255.255.255 area 0'],limit=5)
+
+
